@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Taste Control</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      color: #1a1a1a;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin: 0 0 1.25rem;
+    }
+
+    .page-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .battery-indicator {
+      display: inline-flex;
+      align-items: center;
+      color: #a1a1aa;
+    }
+
+    .battery-indicator svg {
+      display: block;
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    .row {
+      margin-bottom: 1.25rem;
+    }
+
+    .row label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    .row label span.value {
+      display: inline-block;
+      min-width: 3.4rem;
+      box-sizing: border-box;
+      padding: 0.1rem 0.4rem;
+      border: 1px solid #d4d4d8;
+      border-radius: 4px;
+      background: #fafafa;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .row input[type="text"],
+    .row textarea {
+      width: 100%;
+      padding: 0.45rem 0.5rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border: 1px solid #d4d4d8;
+      border-radius: 4px;
+    }
+
+    .row textarea {
+      resize: vertical;
+      min-height: 2.6rem;
+      line-height: 1.4;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 16px;
+      margin: 0;
+      background: transparent;
+    }
+
+    input[type="range"]:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(
+        to right,
+        #2563eb 0%,
+        #2563eb var(--fill, 0%),
+        #e4e4e7 var(--fill, 0%),
+        #e4e4e7 100%
+      );
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -5px;
+      border: none;
+      border-radius: 50%;
+      background: #2563eb;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 3px;
+      background: #e4e4e7;
+    }
+
+    input[type="range"]::-moz-range-progress {
+      height: 6px;
+      border-radius: 3px;
+      background: #2563eb;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: #2563eb;
+      cursor: pointer;
+    }
+
+    .slider-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .slider-staged-fill {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(37, 99, 235, 0.35);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .slider-staged-fill[hidden] {
+      display: none;
+    }
+
+    .slider-staged-marker {
+      position: absolute;
+      top: 50%;
+      width: 4px;
+      height: 14px;
+      border-radius: 1px;
+      background: #1d4ed8;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .slider-staged-marker[hidden] {
+      display: none;
+    }
+
+    .label-readout {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .slider-staged-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2563eb;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .slider-staged-label[hidden] {
+      display: none;
+    }
+
+    .slider-bounds {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      margin-top: 0.2rem;
+      font-size: 0.75rem;
+      color: #71717a;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-bounds span:nth-child(2) {
+      text-align: center;
+    }
+
+    .slider-bounds span:last-child {
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .actions-end {
+      justify-content: flex-end;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #sendSettings {
+      background: #2563eb;
+      color: #fff;
+      border: 1px solid #1d4ed8;
+      border-radius: 6px;
+    }
+
+    #sendSettings:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+
+    .status-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 8.5rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .status-badge.status-on {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-badge.status-off {
+      background: #f4f4f5;
+      color: #52525b;
+    }
+
+    .status-badge.status-calibrating {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .busy-spinner {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+      border: 2px solid #d4d4d8;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .busy-spinner[hidden] {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #telemetry {
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin: 0;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 2.5rem;
+    }
+
+    #telemetry-section h2 {
+      margin: 0 0 0.5rem;
+    }
+
+    #entries-section {
+      margin-top: 1.5rem;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    #entries-section.list-edit-mode {
+      border-color: #1d4ed8;
+      background: #eff6ff;
+    }
+
+    .entries-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .entries-header h2 {
+      margin: 0;
+    }
+
+    .entries-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-icon-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      color: #52525b;
+      background: transparent;
+      border: 1px solid #d4d4d8;
+      border-radius: 6px;
+    }
+
+    .btn-icon-toggle:hover:not(:disabled) {
+      color: #1a1a1a;
+      border-color: #a1a1aa;
+    }
+
+    .btn-icon-toggle.active {
+      color: #1d4ed8;
+      background: #eff6ff;
+      border-color: #1d4ed8;
+    }
+
+    .csv-menu-wrapper {
+      position: relative;
+    }
+
+    .csv-menu {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      right: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      min-width: 11rem;
+      padding: 0.35rem;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .csv-menu[hidden] {
+      display: none;
+    }
+
+    .csv-menu button {
+      padding: 0.5rem 0.6rem;
+      font-size: 0.85rem;
+      text-align: left;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .csv-menu button:hover {
+      background: #f4f4f5;
+    }
+
+    .csv-menu-danger {
+      color: #dc2626;
+      border-top: 1px solid #e4e4e7 !important;
+      margin-top: 0.25rem;
+      padding-top: 0.6rem !important;
+    }
+
+    .csv-menu-danger:hover {
+      background: #fef2f2 !important;
+    }
+
+    #entries {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .entry-row {
+      display: grid;
+      grid-template-columns: 1.5rem 5rem 4rem 4rem 3.5rem 1fr auto auto;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: #a1a1aa;
+      font-size: 1rem;
+      line-height: 1;
+      user-select: none;
+      touch-action: none;
+      text-align: center;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .entry-row-ghost {
+      opacity: 0.45;
+    }
+
+    .drag-handle-spacer {
+      width: 1.5rem;
+    }
+
+    .entry-row input[type="number"],
+    .entry-row input[type="text"] {
+      display: block;
+      width: 100%;
+      height: 1.85rem;
+      margin: 0;
+      padding: 0 0.4rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 400;
+      font-variant-numeric: inherit;
+      letter-spacing: inherit;
+      line-height: calc(1.85rem - 2px);
+      color: inherit;
+      text-align: left;
+      background: #fff;
+      border: 1px solid #d4d4d8;
+      border-radius: 4px;
+    }
+
+    .entry-row input:read-only {
+      background: #f4f4f5;
+      border-color: #e4e4e7;
+    }
+
+    .entry-row input[type="number"] {
+      font-variant-numeric: tabular-nums;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .entry-row input[type="number"]::-webkit-inner-spin-button,
+    .entry-row input[type="number"]::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+
+    .entry-row .btn-set,
+    .entry-row .btn-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.85rem;
+      min-height: 1.85rem;
+      padding: 0;
+      color: #71717a;
+      background: transparent;
+      border: 1px solid #d4d4d8;
+      border-radius: 4px;
+    }
+
+    .entry-row .btn-set:hover:not(:disabled) {
+      color: #2563eb;
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .entry-row .btn-delete:hover:not(:disabled) {
+      color: #dc2626;
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+
+    .entry-row .btn-spacer {
+      width: 100%;
+      min-height: 1.85rem;
+    }
+
+    .entry-row-header {
+      display: grid;
+      grid-template-columns: 1.5rem 5rem 4rem 4rem 3.5rem 1fr auto auto;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #71717a;
+      margin-bottom: 0.35rem;
+    }
+
+    #entryMessage {
+      font-size: 0.85rem;
+      color: #b45309;
+      min-height: 1.25rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .entry-num-unit {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      #telemetry {
+        height: calc(0.85rem * 1.4 * 2 + 1.5rem);
+        min-height: calc(0.85rem * 1.4 * 2 + 1.5rem);
+        line-height: 1.4;
+        overflow: auto;
+      }
+
+      .entry-row-header {
+        display: none;
+      }
+
+      .entry-row {
+        grid-template-columns: 1fr 1fr 1fr auto;
+        grid-template-areas:
+          "taster taster taster set"
+          "mv freq duty delete"
+          "comment comment comment handle";
+        gap: 0.45rem 0.5rem;
+        padding: 0.65rem;
+        margin-bottom: 0.65rem;
+        background: #fff;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+
+      .drag-handle-spacer,
+      .btn-spacer {
+        display: none;
+      }
+
+      .drag-handle {
+        grid-area: handle;
+        align-self: center;
+        justify-self: center;
+        font-size: 1rem;
+        height: 1.85rem;
+        min-height: 1.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .taster-cell {
+        grid-area: taster;
+      }
+
+      .entry-mv {
+        grid-area: mv;
+      }
+
+      .entry-freq {
+        grid-area: freq;
+      }
+
+      .entry-duty {
+        grid-area: duty;
+      }
+
+      .comment-input {
+        grid-area: comment;
+      }
+
+      .btn-set {
+        grid-area: set;
+        align-self: start;
+      }
+
+      .btn-delete {
+        grid-area: delete;
+        align-self: start;
+        justify-self: center;
+      }
+
+      .entry-mv,
+      .entry-freq,
+      .entry-duty {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 0.15rem;
+      }
+
+      .entry-num-unit {
+        display: block;
+        font-size: 0.7rem;
+        color: #71717a;
+      }
+
+      #commentInput {
+        height: calc(0.9rem * 1.4 * 2 + 0.9rem);
+        min-height: calc(0.9rem * 1.4 * 2 + 0.9rem);
+        max-height: calc(0.9rem * 1.4 * 2 + 0.9rem);
+        resize: none;
+        overflow: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>Digital Taste Control</h1>
+    <div class="page-header-actions">
+      <span id="battery" class="battery-indicator" role="img" aria-label="Battery: Unknown" title="Battery: Unknown"></span>
+      <button id="connect" type="button">Connect BLE</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="powerToggle" type="button" disabled>Turn On</button>
+    <div class="status-cluster">
+      <span id="powerStatus" class="status-badge status-off">not connected</span>
+      <span id="busySpinner" class="busy-spinner" hidden aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="tasterInput">Taster</label>
+    <input type="text" id="tasterInput" placeholder="Taster">
+  </div>
+
+  <div class="row">
+    <label for="mvSlider">
+      <span class="label-text">Target voltage (mV)</span>
+      <span class="label-readout">
+        <span class="slider-staged-label" id="mvStagedLabel" hidden></span>
+        <span class="value" id="mvValue">200</span>
+      </span>
+    </label>
+    <div class="slider-wrap">
+      <input type="range" id="mvSlider" min="0" max="1400" step="50" value="200">
+      <span class="slider-staged-fill" id="mvStagedFill" hidden aria-hidden="true"></span>
+      <span class="slider-staged-marker" id="mvStagedMarker" hidden aria-hidden="true"></span>
+    </div>
+    <div class="slider-bounds">
+      <span>0</span>
+      <span>700</span>
+      <span>1400</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="freqSlider">
+      <span class="label-text">Frequency (Hz)</span>
+      <span class="label-readout">
+        <span class="slider-staged-label" id="freqStagedLabel" hidden></span>
+        <span class="value" id="freqValue">200</span>
+      </span>
+    </label>
+    <div class="slider-wrap">
+      <input type="range" id="freqSlider" min="0" max="1400" step="50" value="200">
+      <span class="slider-staged-fill" id="freqStagedFill" hidden aria-hidden="true"></span>
+      <span class="slider-staged-marker" id="freqStagedMarker" hidden aria-hidden="true"></span>
+    </div>
+    <div class="slider-bounds">
+      <span>0</span>
+      <span>700</span>
+      <span>1400</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="dutySlider">
+      <span class="label-text">Duty cycle (%)</span>
+      <span class="label-readout">
+        <span class="slider-staged-label" id="dutyStagedLabel" hidden></span>
+        <span class="value" id="dutyValue">50</span>
+      </span>
+    </label>
+    <div class="slider-wrap">
+      <input type="range" id="dutySlider" min="0" max="100" step="5" value="50">
+      <span class="slider-staged-fill" id="dutyStagedFill" hidden aria-hidden="true"></span>
+      <span class="slider-staged-marker" id="dutyStagedMarker" hidden aria-hidden="true"></span>
+    </div>
+    <div class="slider-bounds">
+      <span>0</span>
+      <span>50</span>
+      <span>100</span>
+    </div>
+  </div>
+
+  <div class="actions actions-end">
+    <button id="sendSettings" type="button" disabled>Send Settings</button>
+    <button id="saveCurrentEntry" type="button">Save current as entry</button>
+  </div>
+
+  <div class="row">
+    <label for="commentInput">Comment</label>
+    <textarea id="commentInput" rows="2" placeholder="Comment"></textarea>
+  </div>
+
+  <p id="entryMessage"></p>
+
+  <section id="telemetry-section">
+    <h2>Serial monitor</h2>
+    <pre id="telemetry">not connected</pre>
+  </section>
+
+  <section id="entries-section">
+    <div class="entries-header">
+      <h2>Saved entries</h2>
+      <div class="entries-toolbar">
+        <button type="button" class="btn-icon-toggle" id="toggleListEditBtn" aria-pressed="false"></button>
+        <div class="csv-menu-wrapper">
+          <button type="button" class="btn-icon-toggle" id="csvMenuBtn" aria-haspopup="true" aria-expanded="false" aria-label="CSV options" title="CSV options"></button>
+          <div class="csv-menu" id="csvMenu" hidden>
+            <button type="button" id="exportCsvBtn">Export CSV</button>
+            <button type="button" id="importCsvReplaceBtn">Import CSV (replace)</button>
+            <button type="button" id="importCsvAppendBtn">Import CSV (append)</button>
+            <button type="button" id="deleteAllEntriesBtn" class="csv-menu-danger">Delete all entries</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="csvFileInput" accept=".csv,text/csv" hidden>
+    <div class="entry-row-header">
+      <span aria-hidden="true"></span>
+      <span>Taster</span>
+      <span>mV</span>
+      <span>Hz</span>
+      <span>Duty%</span>
+      <span>Comment</span>
+      <span></span>
+      <span></span>
+    </div>
+    <ul id="entries"></ul>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script>
+    const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+    const RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+    const TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+    const COMMAND_DELAY_MS = 150;
+    const STORAGE_KEY = 'digitalTaste.entries.v1';
+    const TASTER_STORAGE_KEY = 'digitalTaste.currentTaster';
+    const SETTINGS_STORAGE_KEY = 'digitalTaste.settings.v1';
+    const STAGED_STORAGE_KEY = 'digitalTaste.staged.v1';
+
+    const MV_MIN = 0;
+    const MV_MAX = 1400;
+    const FREQ_MIN = 0;
+    const FREQ_MAX = 1400;
+    const DUTY_MIN = 0;
+    const DUTY_MAX = 100;
+
+    const TRASH_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
+    const PLAY_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><polygon points="8,5 19,12 8,19" fill="currentColor"></polygon></svg>`;
+    const PENCIL_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="M15 5l4 4"></path></svg>`;
+    const GEAR_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>`;
+
+    let rxChar = null;
+    let device = null;
+    let lineBuffer = '';
+    let entries = [];
+    let entriesSortable = null;
+    let bleConnected = false;
+    let sendingInProgress = false;
+    let busyCount = 0;
+    let isOn = false;
+    let isCalibrating = false;
+    let pendingImportMode = 'replace';
+    let listEditMode = false;
+
+    const connectBtn = document.getElementById('connect');
+    const powerToggleBtn = document.getElementById('powerToggle');
+    const powerStatusEl = document.getElementById('powerStatus');
+    const busySpinnerEl = document.getElementById('busySpinner');
+    const sendSettingsBtn = document.getElementById('sendSettings');
+    const saveCurrentEntryBtn = document.getElementById('saveCurrentEntry');
+    const telemetryEl = document.getElementById('telemetry');
+    const batteryEl = document.getElementById('battery');
+    const entriesSection = document.getElementById('entries-section');
+    const entriesEl = document.getElementById('entries');
+    const entryMessageEl = document.getElementById('entryMessage');
+    const toggleListEditBtn = document.getElementById('toggleListEditBtn');
+    const csvMenuBtn = document.getElementById('csvMenuBtn');
+    const csvMenu = document.getElementById('csvMenu');
+    const tasterInput = document.getElementById('tasterInput');
+    const commentInput = document.getElementById('commentInput');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const importCsvReplaceBtn = document.getElementById('importCsvReplaceBtn');
+    const importCsvAppendBtn = document.getElementById('importCsvAppendBtn');
+    const deleteAllEntriesBtn = document.getElementById('deleteAllEntriesBtn');
+    const csvFileInput = document.getElementById('csvFileInput');
+
+    const mvSlider = document.getElementById('mvSlider');
+    const freqSlider = document.getElementById('freqSlider');
+    const dutySlider = document.getElementById('dutySlider');
+    const mvValue = document.getElementById('mvValue');
+    const freqValue = document.getElementById('freqValue');
+    const dutyValue = document.getElementById('dutyValue');
+    const mvStagedFill = document.getElementById('mvStagedFill');
+    const freqStagedFill = document.getElementById('freqStagedFill');
+    const dutyStagedFill = document.getElementById('dutyStagedFill');
+    const mvStagedMarker = document.getElementById('mvStagedMarker');
+    const freqStagedMarker = document.getElementById('freqStagedMarker');
+    const dutyStagedMarker = document.getElementById('dutyStagedMarker');
+    const mvStagedLabel = document.getElementById('mvStagedLabel');
+    const freqStagedLabel = document.getElementById('freqStagedLabel');
+    const dutyStagedLabel = document.getElementById('dutyStagedLabel');
+
+    const controlSliders = [mvSlider, freqSlider, dutySlider];
+
+    const BATTERY_LEVELS = {
+      low: { fillWidth: 4, color: '#dc2626', label: 'Low' },
+      med: { fillWidth: 9, color: '#ca8a04', label: 'Medium' },
+      high: { fillWidth: 14, color: '#16a34a', label: 'High' },
+    };
+
+    function batteryIconSvg(level) {
+      const config = BATTERY_LEVELS[level];
+      const color = config?.color || '#a1a1aa';
+      const fill = config
+        ? `<rect x="4" y="9" width="${config.fillWidth}" height="6" rx="1" fill="${config.color}"></rect>`
+        : '';
+      return `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><rect x="2" y="7" width="18" height="10" rx="2" stroke="${color}" stroke-width="2"></rect><rect x="20" y="10" width="2.5" height="4" rx="0.6" fill="${color}"></rect>${fill}</svg>`;
+    }
+
+    function setBatteryLevel(level) {
+      const config = BATTERY_LEVELS[level];
+      const label = config ? config.label : 'Unknown';
+      batteryEl.innerHTML = batteryIconSvg(level);
+      batteryEl.title = `Battery: ${label}`;
+      batteryEl.setAttribute('aria-label', `Battery: ${label}`);
+    }
+
+    function generateId() {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return `entry-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    function loadCurrentTaster() {
+      try {
+        const raw = localStorage.getItem(TASTER_STORAGE_KEY);
+        return typeof raw === 'string' ? raw : '';
+      } catch {
+        return '';
+      }
+    }
+
+    function saveCurrentTaster(value) {
+      localStorage.setItem(TASTER_STORAGE_KEY, value);
+    }
+
+    function getDashboardTaster() {
+      return tasterInput.value.trim();
+    }
+
+    function getDashboardComment() {
+      return commentInput.value.trim();
+    }
+
+    function clearDashboardComment() {
+      commentInput.value = '';
+    }
+
+    function syncDashboardTaster(value) {
+      tasterInput.value = value;
+      saveCurrentTaster(value);
+    }
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+        return parsed
+          .filter((entry) =>
+            entry &&
+            typeof entry.id === 'string' &&
+            typeof entry.mv === 'number' &&
+            typeof entry.freq === 'number' &&
+            typeof entry.duty === 'number' &&
+            typeof entry.comment === 'string'
+          )
+          .map((entry) => ({
+            ...entry,
+            taster: typeof entry.taster === 'string' ? entry.taster : '',
+          }));
+      } catch {
+        return [];
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function clampInt(value, min, max) {
+      const num = Math.round(Number(value));
+      if (Number.isNaN(num)) {
+        return null;
+      }
+      return Math.min(max, Math.max(min, num));
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return {
+          mv: clampInt(parsed?.mv, MV_MIN, MV_MAX) ?? 200,
+          freq: clampInt(parsed?.freq, FREQ_MIN, FREQ_MAX) ?? 200,
+          duty: clampInt(parsed?.duty, DUTY_MIN, DUTY_MAX) ?? 50,
+        };
+      } catch {
+        return { mv: 200, freq: 200, duty: 50 };
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
+        mv: Number(mvSlider.value),
+        freq: Number(freqSlider.value),
+        duty: Number(dutySlider.value),
+      }));
+    }
+
+    let stagedValues = { mv: null, freq: null, duty: null };
+
+    function loadStagedValues() {
+      try {
+        const raw = localStorage.getItem(STAGED_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return {
+          mv: clampInt(parsed?.mv, MV_MIN, MV_MAX),
+          freq: clampInt(parsed?.freq, FREQ_MIN, FREQ_MAX),
+          duty: clampInt(parsed?.duty, DUTY_MIN, DUTY_MAX),
+        };
+      } catch {
+        return { mv: null, freq: null, duty: null };
+      }
+    }
+
+    function saveStagedValues() {
+      localStorage.setItem(STAGED_STORAGE_KEY, JSON.stringify(stagedValues));
+    }
+
+    function updateStagedFill(slider, fillEl, markerEl, value) {
+      if (value === null || value === undefined) {
+        fillEl.hidden = true;
+        markerEl.hidden = true;
+        return;
+      }
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const percent = max > min ? (value - min) / (max - min) : 0;
+      const thumb = 16;
+      const usableWidth = Math.max(slider.clientWidth - thumb, 0);
+      const position = thumb / 2 + percent * usableWidth;
+      fillEl.style.width = `${position}px`;
+      fillEl.title = `Device is currently applying: ${value}`;
+      fillEl.hidden = false;
+      markerEl.style.left = `${position}px`;
+      markerEl.title = `Device is currently applying: ${value}`;
+      markerEl.hidden = false;
+    }
+
+    function updateStagedLabel(label, value, unit) {
+      if (value === null || value === undefined) {
+        label.hidden = true;
+        label.textContent = '';
+        return;
+      }
+      label.textContent = `Device: ${value}${unit}`;
+      label.hidden = false;
+    }
+
+    function updateStagedMarkers() {
+      updateStagedFill(mvSlider, mvStagedFill, mvStagedMarker, stagedValues.mv);
+      updateStagedFill(freqSlider, freqStagedFill, freqStagedMarker, stagedValues.freq);
+      updateStagedFill(dutySlider, dutyStagedFill, dutyStagedMarker, stagedValues.duty);
+      updateStagedLabel(mvStagedLabel, stagedValues.mv, ' mV');
+      updateStagedLabel(freqStagedLabel, stagedValues.freq, ' Hz');
+      updateStagedLabel(dutyStagedLabel, stagedValues.duty, '%');
+    }
+
+    function setStagedValues(mv, freq, duty) {
+      const clampedMv = clampInt(mv, MV_MIN, MV_MAX);
+      const clampedFreq = clampInt(freq, FREQ_MIN, FREQ_MAX);
+      const clampedDuty = clampInt(duty, DUTY_MIN, DUTY_MAX);
+      if (clampedMv === null || clampedFreq === null || clampedDuty === null) {
+        return;
+      }
+      stagedValues = { mv: clampedMv, freq: clampedFreq, duty: clampedDuty };
+      saveStagedValues();
+      updateStagedMarkers();
+    }
+
+    window.addEventListener('resize', updateStagedMarkers);
+
+    function showEntryMessage(text) {
+      entryMessageEl.textContent = text;
+    }
+
+    function clearEntryMessageSoon() {
+      if (!entryMessageEl.textContent) {
+        return;
+      }
+      setTimeout(() => {
+        entryMessageEl.textContent = '';
+      }, 3000);
+    }
+
+    function updateSliderFill(slider) {
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const value = Number(slider.value);
+      const percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
+      slider.style.setProperty('--fill', `${percent}%`);
+    }
+
+    function updateSlidersDisplay(mv, freq, duty) {
+      mvSlider.value = mv;
+      mvValue.textContent = mv;
+      freqSlider.value = freq;
+      freqValue.textContent = freq;
+      dutySlider.value = duty;
+      dutyValue.textContent = duty + '%';
+      updateSliderFill(mvSlider);
+      updateSliderFill(freqSlider);
+      updateSliderFill(dutySlider);
+    }
+
+    function bindSlider(slider, valueEl, suffix = '') {
+      updateSliderFill(slider);
+      slider.addEventListener('input', () => {
+        valueEl.textContent = slider.value + suffix;
+        updateSliderFill(slider);
+      });
+    }
+
+    bindSlider(mvSlider, mvValue);
+    bindSlider(freqSlider, freqValue);
+    bindSlider(dutySlider, dutyValue, '%');
+    controlSliders.forEach((slider) => slider.addEventListener('change', saveSettings));
+
+    tasterInput.value = loadCurrentTaster();
+    tasterInput.addEventListener('change', () => {
+      saveCurrentTaster(tasterInput.value);
+    });
+
+    function setBusy(busy) {
+      busyCount += busy ? 1 : -1;
+      if (busyCount < 0) {
+        busyCount = 0;
+      }
+      const isBusy = busyCount > 0;
+      busySpinnerEl.hidden = !isBusy;
+      busySpinnerEl.setAttribute('aria-hidden', String(!isBusy));
+    }
+
+    function clearBusy() {
+      busyCount = 0;
+      busySpinnerEl.hidden = true;
+      busySpinnerEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function updateSetButtonsEnabled() {
+      const setButtons = entriesEl.querySelectorAll('.btn-set');
+      setButtons.forEach((btn) => {
+        btn.disabled = !bleConnected || sendingInProgress;
+      });
+    }
+
+    function setControlsEnabled(enabled) {
+      bleConnected = enabled;
+      sendSettingsBtn.disabled = !enabled || sendingInProgress;
+      updateSetButtonsEnabled();
+      updatePowerUI();
+    }
+
+    function updatePowerUI() {
+      const label = !bleConnected
+        ? 'not connected'
+        : !isOn
+          ? 'OFF'
+          : (isCalibrating ? 'CALIBRATING' : 'ON');
+      powerStatusEl.textContent = label;
+      powerStatusEl.classList.toggle('status-on', bleConnected && isOn && !isCalibrating);
+      powerStatusEl.classList.toggle('status-off', !bleConnected || !isOn);
+      powerStatusEl.classList.toggle('status-calibrating', bleConnected && isOn && isCalibrating);
+      powerToggleBtn.disabled = !bleConnected || sendingInProgress;
+      powerToggleBtn.textContent = isOn ? 'Turn Off' : 'Turn On';
+    }
+
+    async function setPower(turnOn) {
+      if (!rxChar) {
+        return;
+      }
+      setBusy(true);
+      try {
+        if (turnOn) {
+          const mv = mvSlider.value;
+          const freq = freqSlider.value;
+          const duty = dutySlider.value;
+          await sendValues(mv, freq, duty, `settings sent — turning on (v=${mv}, f=${freq}, d=${duty})`);
+          await sleep(COMMAND_DELAY_MS);
+          await writeCommand('o\n');
+          isOn = true;
+          isCalibrating = true;
+          telemetryEl.textContent = `stimulation ON (v=${mv}, f=${freq}, d=${duty})`;
+        } else {
+          await writeCommand('s\n');
+          isOn = false;
+          isCalibrating = false;
+          telemetryEl.textContent = 'stimulation OFF';
+        }
+      } catch (err) {
+        telemetryEl.textContent = `power command failed: ${err.message}`;
+      } finally {
+        setBusy(false);
+        updatePowerUI();
+      }
+    }
+
+    powerToggleBtn.addEventListener('click', () => setPower(!isOn));
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function writeCommand(text) {
+      if (!rxChar) {
+        throw new Error('Not connected');
+      }
+      await rxChar.writeValueWithoutResponse(new TextEncoder().encode(text));
+    }
+
+    async function sendValues(mv, freq, duty, successLabel) {
+      if (!rxChar) {
+        throw new Error('Not connected');
+      }
+
+      sendingInProgress = true;
+      sendSettingsBtn.disabled = true;
+      powerToggleBtn.disabled = true;
+      updateSetButtonsEnabled();
+      setBusy(true);
+
+      try {
+        await writeCommand(`v${mv}\n`);
+        await sleep(COMMAND_DELAY_MS);
+        await writeCommand(`f${freq}\n`);
+        await sleep(COMMAND_DELAY_MS);
+        await writeCommand(`d${duty}\n`);
+        telemetryEl.textContent = successLabel || `sent settings: v=${mv}, f=${freq}, d=${duty}`;
+      } finally {
+        sendingInProgress = false;
+        setBusy(false);
+        if (device?.gatt?.connected) {
+          setControlsEnabled(true);
+        } else {
+          bleConnected = false;
+          updateSetButtonsEnabled();
+        }
+      }
+    }
+
+    function createEntry(mv, freq, duty, comment = '', taster = '') {
+      return {
+        id: generateId(),
+        mv,
+        freq,
+        duty,
+        taster,
+        comment,
+      };
+    }
+
+    function escapeCsvField(value) {
+      const str = String(value ?? '');
+      if (/[",\r\n]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    }
+
+    function entriesToCsv(entryList) {
+      const lines = ['mv,hz,duty,taster,comment'];
+      for (const entry of entryList) {
+        lines.push([
+          escapeCsvField(entry.mv),
+          escapeCsvField(entry.freq),
+          escapeCsvField(entry.duty),
+          escapeCsvField(entry.taster),
+          escapeCsvField(entry.comment),
+        ].join(','));
+      }
+      return lines.join('\n') + '\n';
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (text[i + 1] === '"') {
+              field += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            field += ch;
+          }
+        } else if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === ',') {
+          row.push(field);
+          field = '';
+        } else if (ch === '\r') {
+          continue;
+        } else if (ch === '\n') {
+          row.push(field);
+          if (row.length > 1 || row[0] !== '') {
+            rows.push(row);
+          }
+          row = [];
+          field = '';
+        } else {
+          field += ch;
+        }
+      }
+
+      if (field.length > 0 || row.length > 0) {
+        row.push(field);
+        if (row.length > 1 || row[0] !== '') {
+          rows.push(row);
+        }
+      }
+
+      return rows;
+    }
+
+    function rowsToEntries(rows) {
+      const result = { entries: [], skippedCount: 0, errors: [] };
+      let startIndex = 0;
+      let hasTasterCol = false;
+
+      if (rows.length > 0 && rows[0][0]?.trim().toLowerCase() === 'mv') {
+        const headers = rows[0].map((cell) => cell.trim().toLowerCase());
+        hasTasterCol = headers.includes('taster');
+        startIndex = 1;
+      }
+
+      for (let i = startIndex; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.every((cell) => cell.trim() === '')) {
+          continue;
+        }
+        if (row.length < 3) {
+          result.skippedCount++;
+          result.errors.push(`Row ${i + 1}: expected at least 3 columns`);
+          continue;
+        }
+
+        const mv = clampInt(row[0], MV_MIN, MV_MAX);
+        const freq = clampInt(row[1], FREQ_MIN, FREQ_MAX);
+        const duty = clampInt(row[2], DUTY_MIN, DUTY_MAX);
+        const taster = hasTasterCol ? (row[3] ?? '').trim() : '';
+        const comment = hasTasterCol ? (row[4] ?? '').trim() : (row[3] ?? '').trim();
+
+        if (mv === null || freq === null || duty === null) {
+          result.skippedCount++;
+          result.errors.push(`Row ${i + 1}: invalid numeric values`);
+          continue;
+        }
+
+        result.entries.push(createEntry(mv, freq, duty, comment, taster));
+      }
+
+      return result;
+    }
+
+    function exportEntriesCsv() {
+      const csv = entriesToCsv(entries);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'digital-taste-entries.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showEntryMessage(`Exported ${entries.length} entries.`);
+      clearEntryMessageSoon();
+    }
+
+    async function importEntriesCsv(file, mode) {
+      try {
+        const text = await file.text();
+        const rows = parseCsv(text);
+        const { entries: importedEntries, skippedCount } = rowsToEntries(rows);
+
+        if (importedEntries.length === 0) {
+          showEntryMessage('Import failed: no valid rows found.');
+          clearEntryMessageSoon();
+          return;
+        }
+
+        if (mode === 'replace') {
+          entries = importedEntries;
+        } else {
+          entries.push(...importedEntries);
+        }
+
+        saveEntries();
+        renderEntries();
+
+        const modeLabel = mode === 'replace' ? 'replaced list' : 'appended';
+        let message = `Imported ${importedEntries.length} entries (${modeLabel}).`;
+        if (skippedCount > 0) {
+          const rowWord = skippedCount === 1 ? 'row' : 'rows';
+          message += ` Skipped ${skippedCount} invalid ${rowWord}.`;
+        }
+        showEntryMessage(message);
+        clearEntryMessageSoon();
+      } catch (err) {
+        showEntryMessage(`Import failed: ${err.message}`);
+        clearEntryMessageSoon();
+      }
+    }
+
+    function addEntry(entry) {
+      entries.push(entry);
+      saveEntries();
+      renderEntries();
+    }
+
+    function deleteEntry(id) {
+      entries = entries.filter((entry) => entry.id !== id);
+      saveEntries();
+      renderEntries();
+    }
+
+    function bindEntryField(input, entry, field, min, max) {
+      input.addEventListener('change', () => {
+        const clamped = clampInt(input.value, min, max);
+        if (clamped === null) {
+          input.value = entry[field];
+          return;
+        }
+        entry[field] = clamped;
+        input.value = clamped;
+        saveEntries();
+      });
+    }
+
+    function bindEntryTextField(input, entry, field) {
+      input.addEventListener('change', () => {
+        entry[field] = input.value;
+        saveEntries();
+      });
+    }
+
+    function createDragHandleSpacer() {
+      const spacer = document.createElement('span');
+      spacer.className = 'drag-handle-spacer';
+      spacer.setAttribute('aria-hidden', 'true');
+      return spacer;
+    }
+
+    function createDragHandle() {
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'drag-handle';
+      dragHandle.textContent = '⋮⋮';
+      dragHandle.title = 'Drag to reorder';
+      dragHandle.setAttribute('aria-label', 'Drag to reorder');
+      return dragHandle;
+    }
+
+    function createDeleteSpacer() {
+      const spacer = document.createElement('span');
+      spacer.className = 'btn-spacer';
+      spacer.setAttribute('aria-hidden', 'true');
+      return spacer;
+    }
+
+    function attachSetHandler(setBtn, entry) {
+      setBtn.addEventListener('click', async () => {
+        const mv = entry.mv;
+        const freq = entry.freq;
+        const duty = entry.duty;
+
+        updateSlidersDisplay(mv, freq, duty);
+        saveSettings();
+        syncDashboardTaster(entry.taster);
+
+        try {
+          const label = entry.comment
+            ? `sent preset "${entry.comment}": v=${mv}, f=${freq}, d=${duty}`
+            : `sent preset: v=${mv}, f=${freq}, d=${duty}`;
+          await sendValues(mv, freq, duty, label);
+        } catch (err) {
+          telemetryEl.textContent = `send failed: ${err.message}`;
+        }
+      });
+    }
+
+    function syncEntriesOrderFromDom() {
+      const entryById = new Map(entries.map((entry) => [entry.id, entry]));
+      entries = [...entriesEl.children]
+        .map((li) => entryById.get(li.dataset.id))
+        .filter(Boolean);
+      saveEntries();
+    }
+
+    function initEntriesSortable() {
+      if (entriesSortable) {
+        entriesSortable.destroy();
+        entriesSortable = null;
+      }
+      if (!listEditMode || typeof Sortable === 'undefined') {
+        return;
+      }
+      entriesSortable = Sortable.create(entriesEl, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'entry-row-ghost',
+        onEnd() {
+          syncEntriesOrderFromDom();
+        },
+      });
+    }
+
+    function updateListEditButton() {
+      toggleListEditBtn.innerHTML = PENCIL_ICON_SVG;
+      const label = listEditMode ? 'Done editing' : 'Edit list';
+      toggleListEditBtn.title = label;
+      toggleListEditBtn.setAttribute('aria-label', label);
+      toggleListEditBtn.setAttribute('aria-pressed', String(listEditMode));
+      toggleListEditBtn.classList.toggle('active', listEditMode);
+    }
+
+    function createEntryValueInput(entry, field, options) {
+      const input = document.createElement('input');
+      input.type = options.type;
+      input.value = entry[field];
+      input.setAttribute('aria-label', options.ariaLabel);
+      if (options.className) {
+        input.className = options.className;
+      }
+      if (options.type === 'number') {
+        input.min = options.min;
+        input.max = options.max;
+        input.step = options.step ?? 1;
+      }
+      if (listEditMode) {
+        if (options.type === 'number') {
+          bindEntryField(input, entry, field, options.min, options.max);
+        } else {
+          bindEntryTextField(input, entry, field);
+        }
+      } else {
+        input.readOnly = true;
+        input.tabIndex = -1;
+      }
+      return input;
+    }
+
+    function wrapNumericField(input, areaClass, unit) {
+      const wrap = document.createElement('div');
+      wrap.className = areaClass;
+      const unitEl = document.createElement('span');
+      unitEl.className = 'entry-num-unit';
+      unitEl.textContent = unit;
+      wrap.append(input, unitEl);
+      return wrap;
+    }
+
+    function setListEditMode(editing) {
+      listEditMode = editing;
+      updateListEditButton();
+      entriesSection.classList.toggle('list-edit-mode', editing);
+      renderEntries();
+    }
+
+    function renderEntries() {
+      entriesEl.replaceChildren();
+
+      entries.forEach((entry) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        li.dataset.id = entry.id;
+
+        const setBtn = document.createElement('button');
+        setBtn.type = 'button';
+        setBtn.className = 'btn-set';
+        setBtn.innerHTML = PLAY_ICON_SVG;
+        setBtn.title = 'Set';
+        setBtn.setAttribute('aria-label', 'Set');
+        setBtn.disabled = !bleConnected || sendingInProgress;
+        attachSetHandler(setBtn, entry);
+
+        const tasterInputRow = createEntryValueInput(entry, 'taster', {
+          type: 'text',
+          className: 'taster-cell',
+          ariaLabel: 'Entry taster',
+        });
+        const mvInput = createEntryValueInput(entry, 'mv', {
+          type: 'number',
+          min: MV_MIN,
+          max: MV_MAX,
+          ariaLabel: 'Entry mV',
+        });
+        const freqInput = createEntryValueInput(entry, 'freq', {
+          type: 'number',
+          min: FREQ_MIN,
+          max: FREQ_MAX,
+          ariaLabel: 'Entry Hz',
+        });
+        const dutyInput = createEntryValueInput(entry, 'duty', {
+          type: 'number',
+          min: DUTY_MIN,
+          max: DUTY_MAX,
+          ariaLabel: 'Entry duty percent',
+        });
+
+        const mvField = wrapNumericField(mvInput, 'entry-mv', 'mV');
+        const freqField = wrapNumericField(freqInput, 'entry-freq', 'Hz');
+        const dutyField = wrapNumericField(dutyInput, 'entry-duty', 'Duty%');
+
+        const commentInput = document.createElement('input');
+        commentInput.type = 'text';
+        commentInput.className = 'comment-input';
+        commentInput.value = entry.comment;
+        commentInput.setAttribute('aria-label', 'Entry comment');
+        commentInput.addEventListener('change', () => {
+          entry.comment = commentInput.value;
+          saveEntries();
+        });
+
+        if (listEditMode) {
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.className = 'btn-delete';
+          deleteBtn.innerHTML = TRASH_ICON_SVG;
+          deleteBtn.title = 'Delete entry';
+          deleteBtn.setAttribute('aria-label', 'Delete entry');
+          deleteBtn.addEventListener('click', () => {
+            deleteEntry(entry.id);
+          });
+
+          li.append(
+            createDragHandle(),
+            tasterInputRow,
+            mvField,
+            freqField,
+            dutyField,
+            commentInput,
+            setBtn,
+            deleteBtn
+          );
+        } else {
+          li.append(
+            createDragHandleSpacer(),
+            tasterInputRow,
+            mvField,
+            freqField,
+            dutyField,
+            commentInput,
+            setBtn,
+            createDeleteSpacer()
+          );
+        }
+
+        entriesEl.appendChild(li);
+      });
+
+      initEntriesSortable();
+    }
+
+    connectBtn.addEventListener('click', async () => {
+      setBusy(true);
+      try {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [SERVICE_UUID] }],
+        });
+        device.addEventListener('gattserverdisconnected', onDisconnected);
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        rxChar = await service.getCharacteristic(RX_UUID);
+        const txChar = await service.getCharacteristic(TX_UUID);
+
+        await txChar.startNotifications();
+        txChar.addEventListener('characteristicvaluechanged', onNotify);
+
+        telemetryEl.textContent = 'connected';
+        setControlsEnabled(true);
+        isOn = false;
+        updatePowerUI();
+
+        await writeCommand('?\n');
+        await sleep(COMMAND_DELAY_MS);
+        await writeCommand('s\n');
+        await sleep(COMMAND_DELAY_MS);
+        await sendValues(mvSlider.value, freqSlider.value, dutySlider.value, 'connected — settings synced, device off');
+      } catch (err) {
+        telemetryEl.textContent = `connection failed: ${err.message}`;
+        setControlsEnabled(false);
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    sendSettingsBtn.addEventListener('click', async () => {
+      if (!rxChar) {
+        return;
+      }
+
+      try {
+        const mv = mvSlider.value;
+        const freq = freqSlider.value;
+        const duty = dutySlider.value;
+        await sendValues(mv, freq, duty);
+      } catch (err) {
+        telemetryEl.textContent = `send failed: ${err.message}`;
+      }
+    });
+
+    saveCurrentEntryBtn.addEventListener('click', () => {
+      const mv = clampInt(mvSlider.value, MV_MIN, MV_MAX);
+      const freq = clampInt(freqSlider.value, FREQ_MIN, FREQ_MAX);
+      const duty = clampInt(dutySlider.value, DUTY_MIN, DUTY_MAX);
+
+      if (mv === null || freq === null || duty === null) {
+        showEntryMessage('Current slider values are invalid.');
+        clearEntryMessageSoon();
+        return;
+      }
+
+      addEntry(createEntry(mv, freq, duty, getDashboardComment(), getDashboardTaster()));
+      clearDashboardComment();
+      showEntryMessage('Saved current slider values as a new entry.');
+      clearEntryMessageSoon();
+    });
+
+    toggleListEditBtn.addEventListener('click', () => {
+      setListEditMode(!listEditMode);
+    });
+
+    function setCsvMenuOpen(open) {
+      csvMenu.hidden = !open;
+      csvMenuBtn.setAttribute('aria-expanded', String(open));
+      csvMenuBtn.classList.toggle('active', open);
+    }
+
+    csvMenuBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setCsvMenuOpen(csvMenu.hidden);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!csvMenu.hidden && !event.target.closest('.csv-menu-wrapper')) {
+        setCsvMenuOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !csvMenu.hidden) {
+        setCsvMenuOpen(false);
+      }
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+      exportEntriesCsv();
+      setCsvMenuOpen(false);
+    });
+
+    importCsvReplaceBtn.addEventListener('click', () => {
+      pendingImportMode = 'replace';
+      setCsvMenuOpen(false);
+      csvFileInput.click();
+    });
+
+    importCsvAppendBtn.addEventListener('click', () => {
+      pendingImportMode = 'append';
+      setCsvMenuOpen(false);
+      csvFileInput.click();
+    });
+
+    deleteAllEntriesBtn.addEventListener('click', () => {
+      setCsvMenuOpen(false);
+      if (entries.length === 0) {
+        return;
+      }
+      const confirmed = window.confirm(`Delete all ${entries.length} saved entries? This cannot be undone.`);
+      if (!confirmed) {
+        return;
+      }
+      entries = [];
+      saveEntries();
+      renderEntries();
+      showEntryMessage('All entries deleted.');
+      clearEntryMessageSoon();
+    });
+
+    csvFileInput.addEventListener('change', async () => {
+      const file = csvFileInput.files?.[0];
+      csvFileInput.value = '';
+      if (!file) {
+        return;
+      }
+      await importEntriesCsv(file, pendingImportMode);
+    });
+
+    function onDisconnected() {
+      rxChar = null;
+      device = null;
+      isOn = false;
+      isCalibrating = false;
+      sendingInProgress = false;
+      clearBusy();
+      setBatteryLevel(null);
+      telemetryEl.textContent = 'disconnected';
+      setControlsEnabled(false);
+    }
+
+    function parseKeyValueLine(line) {
+      const fields = {};
+      const parts = line.split(' ').slice(1);
+      for (const part of parts) {
+        const eq = part.indexOf('=');
+        if (eq === -1) {
+          continue;
+        }
+        fields[part.slice(0, eq)] = part.slice(eq + 1);
+      }
+      return fields;
+    }
+
+    function syncPowerFromStatus(line) {
+      const fields = parseKeyValueLine(line);
+      if (fields.is_on !== undefined) {
+        isOn = fields.is_on === '1';
+        updatePowerUI();
+      }
+      if (fields.is_calibrating !== undefined) {
+        isCalibrating = fields.is_calibrating === '1';
+        updatePowerUI();
+      }
+      if (fields.vref_target_mv !== undefined && fields.gate_freq_hz !== undefined && fields.gate_duty_pct !== undefined) {
+        setStagedValues(fields.vref_target_mv, fields.gate_freq_hz, fields.gate_duty_pct);
+      }
+    }
+
+    function updateBatteryFromLine(line) {
+      const fields = parseKeyValueLine(line);
+      if (!fields.level) {
+        return;
+      }
+      setBatteryLevel(fields.level.trim().toLowerCase());
+    }
+
+    function onNotify(event) {
+      lineBuffer += new TextDecoder().decode(event.target.value);
+      let idx;
+      while ((idx = lineBuffer.indexOf('\n')) >= 0) {
+        const line = lineBuffer.slice(0, idx).trim();
+        lineBuffer = lineBuffer.slice(idx + 1);
+        if (!line) {
+          continue;
+        }
+        if (line.startsWith('BATTERY ')) {
+          updateBatteryFromLine(line);
+          continue;
+        }
+        telemetryEl.textContent = line;
+        if (line.startsWith('STATUS ')) {
+          syncPowerFromStatus(line);
+        }
+      }
+    }
+
+    const savedSettings = loadSettings();
+    updateSlidersDisplay(savedSettings.mv, savedSettings.freq, savedSettings.duty);
+    stagedValues = loadStagedValues();
+    updateStagedMarkers();
+    updatePowerUI();
+    setBatteryLevel(null);
+    updateListEditButton();
+    csvMenuBtn.innerHTML = GEAR_ICON_SVG;
+    entries = loadEntries();
+    renderEntries();
+  </script>
+</body>
+</html>
