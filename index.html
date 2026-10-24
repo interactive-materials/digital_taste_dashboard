@@ -6,18 +6,21 @@
   <title>Digital Taste Control</title>
   <style>
     :root {
+      /* Type */
+      --font-large: 0.9rem;
+      --font-small: 0.75rem;
+
       /* Buttons */
       --btn-radius: 1.00rem;
-      --btn-font-size: 0.75rem;
 
       /* Frames */
-      --frame-stroke: #DDDDDD;
+      --frame-stroke: #CCCCCC;
       --frame-radius: 10px;
       --frame-padding: 0.75rem;
       --frame-gap: 1.00rem;
 
       /* Slider pattern backgrounds — set to url("path/to/image.png") */
-      --slider-knob-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAKUlEQVR4AUyKgQkAAAjCwmM9ypv8qSIoEgQdg+0keYWk+MGetmYeWLMAAAD//3xI6XkAAAAGSURBVAMA2FIOzUHsk0UAAAAASUVORK5CYII=");
+      --slider-knob-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAM0lEQVR4AVzKwQkAMAhDUXE2Z8lQGSFLWhRaQgO5PH5WVfsldYYNQJCMhxemWXRY/GHwAAAA//9X/hhQAAAABklEQVQDAK37FjSN3nflAAAAAElFTkSuQmCC");
       --slider-track-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAJUlEQVR4AXTKsQkAAAjEQHXpnyFTK99YCKYMV3H6h6Q2XgGkxwAAAP//NjW4vgAAAAZJREFUAwBEPAQJktXFUAAAAABJRU5ErkJggg==");
       --slider-knob-pattern-size: auto;
       --slider-track-pattern-size: auto;
@@ -25,7 +28,6 @@
       --slider-knob-color: #ffffff;
       --slider-track-color: #EAEAEA;
       --slider-knob-size: 24px;
-      --slider-knob-radius: 5px;
       --slider-track-height: calc(var(--slider-knob-size) * 0.8);
       --slider-overlay-color: rgba(82, 82, 91, 0.4);
       --slider-marker-color: #000000;
@@ -36,6 +38,8 @@
     }
 
     body {
+      text-transform: lowercase;
+      font-size: var(--font-large);
       font-family: system-ui, -apple-system, sans-serif;
       max-width: 800px;
       margin: 2rem auto;
@@ -44,7 +48,8 @@
     }
 
     h1 {
-      font-size: 1.25rem;
+      text-transform: capitalize;
+      font-size: var(--font-large);
       margin: 0;
     }
 
@@ -75,7 +80,8 @@
     }
 
     h2 {
-      font-size: 1rem;
+      text-transform: capitalize;
+      font-size: var(--font-large);
       margin: 1.5rem 0 0.75rem;
     }
 
@@ -103,7 +109,7 @@
       justify-content: space-between;
       align-items: baseline;
       margin-bottom: 0.35rem;
-      font-size: 0.9rem;
+      font-size: var(--font-large);
     }
 
     .row label span.value {
@@ -124,7 +130,7 @@
       width: 100%;
       padding: 0.45rem 0.5rem;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: var(--font-large);
       border: 1px solid #d4d4d8;
       border-radius: 4px;
     }
@@ -140,7 +146,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      height: var(--slider-knob-size);
+      height: var(--slider-track-height);
     }
 
     .slider-wrap::before {
@@ -169,7 +175,7 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      height: var(--slider-knob-size);
+      height: var(--slider-track-height);
       margin: 0;
       background: transparent;
     }
@@ -180,7 +186,7 @@
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
-      height: var(--slider-knob-size);
+      height: var(--slider-track-height);
       background: transparent;
       border: none;
     }
@@ -190,10 +196,10 @@
       appearance: none;
       box-sizing: border-box;
       width: var(--slider-knob-size);
-      height: var(--slider-knob-size);
+      height: var(--slider-track-height);
       margin-top: 0;
-      border: 1px solid #1a1a1a;
-      border-radius: var(--slider-knob-radius);
+      border: none;
+      border-radius: 0;
       background-color: var(--slider-knob-color);
       background-image: var(--slider-knob-pattern);
       background-size: var(--slider-knob-pattern-size);
@@ -203,7 +209,7 @@
     }
 
     input[type="range"]::-moz-range-track {
-      height: var(--slider-knob-size);
+      height: var(--slider-track-height);
       background: transparent;
       border: none;
     }
@@ -215,9 +221,9 @@
     input[type="range"]::-moz-range-thumb {
       box-sizing: border-box;
       width: var(--slider-knob-size);
-      height: var(--slider-knob-size);
-      border: 1px solid #1a1a1a;
-      border-radius: var(--slider-knob-radius);
+      height: var(--slider-track-height);
+      border: none;
+      border-radius: 0;
       background-color: var(--slider-knob-color);
       background-image: var(--slider-knob-pattern);
       background-size: var(--slider-knob-pattern-size);
@@ -245,8 +251,8 @@
       position: absolute;
       top: 50%;
       z-index: 1;
-      width: 2px;
-      height: var(--slider-knob-size);
+      width: 1px;
+      height: var(--slider-track-height);
       background: var(--slider-marker-color);
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -263,9 +269,9 @@
     }
 
     .slider-staged-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #2563eb;
+      font-size: var(--font-small);
+      font-weight: 400;
+      color: #71717a;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
@@ -278,9 +284,18 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       margin-top: 0.2rem;
-      font-size: 0.75rem;
+      font-size: var(--font-small);
       color: #71717a;
       font-variant-numeric: tabular-nums;
+    }
+
+    .site-footer {
+      margin-top: 1.5rem;
+      font-size: var(--font-small);
+      font-weight: 400;
+      color: #71717a;
+      text-align: left;
+      text-transform: none;
     }
 
     .slider-bounds span:nth-child(2) {
@@ -304,8 +319,9 @@
     }
 
     button {
+      text-transform: capitalize;
       padding: 0.5rem 1rem;
-      font-size: 0.95rem;
+      font-size: var(--font-small);
       cursor: pointer;
     }
 
@@ -323,10 +339,10 @@
       border-radius: var(--btn-radius);
       background: #f4f4f5;
       color: #18181b;
-      font-size: var(--btn-font-size);
+      font-size: var(--font-small);
       font-weight: 600;
       letter-spacing: 0.06em;
-      text-transform: uppercase;
+      text-transform: capitalize;
       transition: background-color 0.15s, border-color 0.15s;
     }
 
@@ -396,7 +412,7 @@
       min-width: 8.5rem;
       padding: 0.3rem 0.7rem;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: var(--font-large);
       font-weight: 600;
       text-align: center;
     }
@@ -442,7 +458,7 @@
       border-radius: 6px;
       padding: 0.75rem;
       margin: 0;
-      font-size: 0.85rem;
+      font-size: var(--font-large);
       white-space: pre-wrap;
       word-break: break-word;
       min-height: 2.5rem;
@@ -525,7 +541,7 @@
 
     .csv-menu button {
       padding: 0.5rem 0.6rem;
-      font-size: 0.85rem;
+      font-size: var(--font-small);
       text-align: left;
       background: transparent;
       border: none;
@@ -565,7 +581,7 @@
     .drag-handle {
       cursor: grab;
       color: #a1a1aa;
-      font-size: 1rem;
+      font-size: var(--font-large);
       line-height: 1;
       user-select: none;
       touch-action: none;
@@ -592,7 +608,7 @@
       margin: 0;
       padding: 0 0.4rem;
       font-family: inherit;
-      font-size: 0.85rem;
+      font-size: var(--font-small);
       font-weight: 400;
       font-variant-numeric: inherit;
       letter-spacing: inherit;
@@ -656,13 +672,13 @@
       display: grid;
       grid-template-columns: 1.5rem 5rem 4rem 4rem 3.5rem 1fr auto auto;
       gap: 0.5rem;
-      font-size: 0.75rem;
+      font-size: var(--font-small);
       color: #71717a;
       margin-bottom: 0.35rem;
     }
 
     #entryMessage {
-      font-size: 0.85rem;
+      font-size: var(--font-large);
       color: #b45309;
       min-height: 1.25rem;
       margin: 0 0 0.5rem;
@@ -674,8 +690,8 @@
 
     @media (max-width: 640px) {
       #telemetry {
-        height: calc(0.85rem * 1.4 * 2 + 1.5rem);
-        min-height: calc(0.85rem * 1.4 * 2 + 1.5rem);
+        height: calc(var(--font-large) * 1.4 * 2 + 1.5rem);
+        min-height: calc(var(--font-large) * 1.4 * 2 + 1.5rem);
         line-height: 1.4;
         overflow: auto;
       }
@@ -707,7 +723,7 @@
         grid-area: handle;
         align-self: center;
         justify-self: center;
-        font-size: 1rem;
+        font-size: var(--font-large);
         height: 1.85rem;
         min-height: 1.85rem;
         display: flex;
@@ -757,14 +773,14 @@
 
       .entry-num-unit {
         display: block;
-        font-size: 0.7rem;
+        font-size: var(--font-small);
         color: #71717a;
       }
 
       #commentInput {
-        height: calc(0.9rem * 1.4 * 2 + 0.9rem);
-        min-height: calc(0.9rem * 1.4 * 2 + 0.9rem);
-        max-height: calc(0.9rem * 1.4 * 2 + 0.9rem);
+        height: calc(var(--font-large) * 1.4 * 2 + 0.9rem);
+        min-height: calc(var(--font-large) * 1.4 * 2 + 0.9rem);
+        max-height: calc(var(--font-large) * 1.4 * 2 + 0.9rem);
         resize: none;
         overflow: auto;
       }
@@ -901,6 +917,8 @@
     </div>
     <ul id="entries"></ul>
   </section>
+
+  <footer class="site-footer">Interactive Materials Lab 2026</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <script>
