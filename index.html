@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Taste Control</title>
   <style>
+    :root {
+      /* Buttons */
+      --btn-radius: 1.00rem;
+      --btn-font-size: 0.75rem;
+
+      /* Frames */
+      --frame-stroke: #DDDDDD;
+      --frame-radius: 10px;
+      --frame-padding: 0.75rem;
+      --frame-gap: 1.00rem;
+
+      /* Slider pattern backgrounds — set to url("path/to/image.png") */
+      --slider-knob-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAKUlEQVR4AUyKgQkAAAjCwmM9ypv8qSIoEgQdg+0keYWk+MGetmYeWLMAAAD//3xI6XkAAAAGSURBVAMA2FIOzUHsk0UAAAAASUVORK5CYII=");
+      --slider-track-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAJUlEQVR4AXTKsQkAAAjEQHXpnyFTK99YCKYMV3H6h6Q2XgGkxwAAAP//NjW4vgAAAAZJREFUAwBEPAQJktXFUAAAAABJRU5ErkJggg==");
+      --slider-knob-pattern-size: auto;
+      --slider-track-pattern-size: auto;
+      /* Fallback colours shown under / instead of the patterns */
+      --slider-knob-color: #ffffff;
+      --slider-track-color: #EAEAEA;
+      --slider-knob-size: 24px;
+      --slider-knob-radius: 5px;
+      --slider-track-height: calc(var(--slider-knob-size) * 0.8);
+      --slider-overlay-color: rgba(82, 82, 91, 0.4);
+      --slider-marker-color: #000000;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -13,7 +39,7 @@
       font-family: system-ui, -apple-system, sans-serif;
       max-width: 800px;
       margin: 2rem auto;
-      padding: 0 1rem;
+      padding: 0 0.75rem;
       color: #1a1a1a;
     }
 
@@ -57,6 +83,21 @@
       margin-bottom: 1.25rem;
     }
 
+    .frame {
+      border: 1px solid var(--frame-stroke);
+      border-radius: var(--frame-radius);
+      padding: var(--frame-padding);
+      margin-bottom: var(--frame-gap);
+    }
+
+    .frame > :last-child {
+      margin-bottom: 0;
+    }
+
+    .frame h2 {
+      margin-top: 0;
+    }
+
     .row label {
       display: flex;
       justify-content: space-between;
@@ -94,11 +135,41 @@
       line-height: 1.4;
     }
 
+    /* Layering: track (.slider-wrap::before) → overlay spans → knob (input) */
+    .slider-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: var(--slider-knob-size);
+    }
+
+    .slider-wrap::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: var(--slider-track-height);
+      background-color: var(--slider-track-color);
+      background-image: var(--slider-track-pattern);
+      background-size: var(--slider-track-pattern-size);
+      background-repeat: repeat;
+      transform: translateY(-50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .slider-wrap:has(input[type="range"]:disabled)::before {
+      opacity: 0.45;
+    }
+
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
+      position: relative;
+      z-index: 2;
       width: 100%;
-      height: 16px;
+      height: var(--slider-knob-size);
       margin: 0;
       background: transparent;
     }
@@ -109,63 +180,59 @@
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 3px;
-      background: linear-gradient(
-        to right,
-        #2563eb 0%,
-        #2563eb var(--fill, 0%),
-        #e4e4e7 var(--fill, 0%),
-        #e4e4e7 100%
-      );
+      height: var(--slider-knob-size);
+      background: transparent;
+      border: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 16px;
-      height: 16px;
-      margin-top: -5px;
-      border: none;
-      border-radius: 50%;
-      background: #2563eb;
+      box-sizing: border-box;
+      width: var(--slider-knob-size);
+      height: var(--slider-knob-size);
+      margin-top: 0;
+      border: 1px solid #1a1a1a;
+      border-radius: var(--slider-knob-radius);
+      background-color: var(--slider-knob-color);
+      background-image: var(--slider-knob-pattern);
+      background-size: var(--slider-knob-pattern-size);
+      background-position: center;
+      background-repeat: repeat;
       cursor: pointer;
     }
 
     input[type="range"]::-moz-range-track {
-      height: 6px;
-      border-radius: 3px;
-      background: #e4e4e7;
+      height: var(--slider-knob-size);
+      background: transparent;
+      border: none;
     }
 
     input[type="range"]::-moz-range-progress {
-      height: 6px;
-      border-radius: 3px;
-      background: #2563eb;
+      background: transparent;
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border: none;
-      border-radius: 50%;
-      background: #2563eb;
+      box-sizing: border-box;
+      width: var(--slider-knob-size);
+      height: var(--slider-knob-size);
+      border: 1px solid #1a1a1a;
+      border-radius: var(--slider-knob-radius);
+      background-color: var(--slider-knob-color);
+      background-image: var(--slider-knob-pattern);
+      background-size: var(--slider-knob-pattern-size);
+      background-position: center;
+      background-repeat: repeat;
       cursor: pointer;
-    }
-
-    .slider-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
     }
 
     .slider-staged-fill {
       position: absolute;
       top: 50%;
       left: 0;
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(37, 99, 235, 0.35);
+      z-index: 1;
+      height: var(--slider-track-height);
+      background: var(--slider-overlay-color);
       transform: translateY(-50%);
       pointer-events: none;
     }
@@ -177,10 +244,10 @@
     .slider-staged-marker {
       position: absolute;
       top: 50%;
-      width: 4px;
-      height: 14px;
-      border-radius: 1px;
-      background: #1d4ed8;
+      z-index: 1;
+      width: 2px;
+      height: var(--slider-knob-size);
+      background: var(--slider-marker-color);
       transform: translate(-50%, -50%);
       pointer-events: none;
     }
@@ -247,15 +314,73 @@
       cursor: not-allowed;
     }
 
+    #connect,
+    #powerToggle,
+    #sendSettings,
+    #saveCurrentEntry {
+      padding: 0.55rem 1.1rem;
+      border: 1px solid #a1a1aa;
+      border-radius: var(--btn-radius);
+      background: #f4f4f5;
+      color: #18181b;
+      font-size: var(--btn-font-size);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    #connect:hover:not(:disabled),
+    #powerToggle:hover:not(:disabled),
+    #saveCurrentEntry:hover:not(:disabled) {
+      background: #e4e4e7;
+      border-color: #71717a;
+    }
+
+    #connect:active:not(:disabled),
+    #powerToggle:active:not(:disabled),
+    #saveCurrentEntry:active:not(:disabled) {
+      background: #d4d4d8;
+    }
+
     #sendSettings {
-      background: #2563eb;
-      color: #fff;
-      border: 1px solid #1d4ed8;
-      border-radius: 6px;
+      background: #18181b;
+      border-color: #18181b;
+      color: #fafafa;
     }
 
     #sendSettings:hover:not(:disabled) {
-      background: #1d4ed8;
+      background: #3f3f46;
+      border-color: #3f3f46;
+    }
+
+    #sendSettings:active:not(:disabled) {
+      background: #000000;
+    }
+
+    #connect:focus-visible,
+    #powerToggle:focus-visible,
+    #sendSettings:focus-visible,
+    #saveCurrentEntry:focus-visible {
+      outline: 2px solid #52525b;
+      outline-offset: 2px;
+    }
+
+    #connect:disabled,
+    #powerToggle:disabled,
+    #sendSettings:disabled,
+    #saveCurrentEntry:disabled {
+      background: #f4f4f5;
+      border-color: #d4d4d8;
+      color: #a1a1aa;
+      opacity: 1;
+    }
+
+    #sendSettings:disabled {
+      background: #18181b;
+      border-color: #18181b;
+      color: #fafafa;
+      opacity: 0.45;
     }
 
     .status-cluster {
@@ -327,12 +452,6 @@
       margin: 0 0 0.5rem;
     }
 
-    #entries-section {
-      margin-top: 1.5rem;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 0.75rem;
-    }
 
     #entries-section.list-edit-mode {
       border-color: #1d4ed8;
@@ -657,101 +776,103 @@
     <h1>Digital Taste Control</h1>
     <div class="page-header-actions">
       <span id="battery" class="battery-indicator" role="img" aria-label="Battery: Unknown" title="Battery: Unknown"></span>
-      <button id="connect" type="button">Connect BLE</button>
+      <button id="connect" type="button">Connect</button>
     </div>
   </div>
 
-  <div class="actions">
-    <button id="powerToggle" type="button" disabled>Turn On</button>
-    <div class="status-cluster">
-      <span id="powerStatus" class="status-badge status-off">not connected</span>
-      <span id="busySpinner" class="busy-spinner" hidden aria-hidden="true"></span>
+  <section class="frame" id="controls-section">
+    <div class="actions">
+      <button id="powerToggle" type="button" disabled>Turn On</button>
+      <div class="status-cluster">
+        <span id="powerStatus" class="status-badge status-off">not connected</span>
+        <span id="busySpinner" class="busy-spinner" hidden aria-hidden="true"></span>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="tasterInput">Taster</label>
-    <input type="text" id="tasterInput" placeholder="Taster">
-  </div>
-
-  <div class="row">
-    <label for="mvSlider">
-      <span class="label-text">Target voltage (mV)</span>
-      <span class="label-readout">
-        <span class="slider-staged-label" id="mvStagedLabel" hidden></span>
-        <span class="value" id="mvValue">200</span>
-      </span>
-    </label>
-    <div class="slider-wrap">
-      <input type="range" id="mvSlider" min="0" max="1400" step="50" value="200">
-      <span class="slider-staged-fill" id="mvStagedFill" hidden aria-hidden="true"></span>
-      <span class="slider-staged-marker" id="mvStagedMarker" hidden aria-hidden="true"></span>
+    <div class="row">
+      <label for="tasterInput">Taster</label>
+      <input type="text" id="tasterInput" placeholder="Taster">
     </div>
-    <div class="slider-bounds">
-      <span>0</span>
-      <span>700</span>
-      <span>1400</span>
+
+    <div class="row">
+      <label for="mvSlider">
+        <span class="label-text">Target voltage (mV)</span>
+        <span class="label-readout">
+          <span class="slider-staged-label" id="mvStagedLabel" hidden></span>
+          <span class="value" id="mvValue">200</span>
+        </span>
+      </label>
+      <div class="slider-wrap">
+        <input type="range" id="mvSlider" min="0" max="1400" step="50" value="200">
+        <span class="slider-staged-fill" id="mvStagedFill" hidden aria-hidden="true"></span>
+        <span class="slider-staged-marker" id="mvStagedMarker" hidden aria-hidden="true"></span>
+      </div>
+      <div class="slider-bounds">
+        <span>0</span>
+        <span>700</span>
+        <span>1400</span>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="freqSlider">
-      <span class="label-text">Frequency (Hz)</span>
-      <span class="label-readout">
-        <span class="slider-staged-label" id="freqStagedLabel" hidden></span>
-        <span class="value" id="freqValue">200</span>
-      </span>
-    </label>
-    <div class="slider-wrap">
-      <input type="range" id="freqSlider" min="0" max="1400" step="50" value="200">
-      <span class="slider-staged-fill" id="freqStagedFill" hidden aria-hidden="true"></span>
-      <span class="slider-staged-marker" id="freqStagedMarker" hidden aria-hidden="true"></span>
+    <div class="row">
+      <label for="freqSlider">
+        <span class="label-text">Frequency (Hz)</span>
+        <span class="label-readout">
+          <span class="slider-staged-label" id="freqStagedLabel" hidden></span>
+          <span class="value" id="freqValue">200</span>
+        </span>
+      </label>
+      <div class="slider-wrap">
+        <input type="range" id="freqSlider" min="0" max="1400" step="50" value="200">
+        <span class="slider-staged-fill" id="freqStagedFill" hidden aria-hidden="true"></span>
+        <span class="slider-staged-marker" id="freqStagedMarker" hidden aria-hidden="true"></span>
+      </div>
+      <div class="slider-bounds">
+        <span>0</span>
+        <span>700</span>
+        <span>1400</span>
+      </div>
     </div>
-    <div class="slider-bounds">
-      <span>0</span>
-      <span>700</span>
-      <span>1400</span>
+
+    <div class="row">
+      <label for="dutySlider">
+        <span class="label-text">Duty cycle (%)</span>
+        <span class="label-readout">
+          <span class="slider-staged-label" id="dutyStagedLabel" hidden></span>
+          <span class="value" id="dutyValue">50</span>
+        </span>
+      </label>
+      <div class="slider-wrap">
+        <input type="range" id="dutySlider" min="0" max="100" step="5" value="50">
+        <span class="slider-staged-fill" id="dutyStagedFill" hidden aria-hidden="true"></span>
+        <span class="slider-staged-marker" id="dutyStagedMarker" hidden aria-hidden="true"></span>
+      </div>
+      <div class="slider-bounds">
+        <span>0</span>
+        <span>50</span>
+        <span>100</span>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="dutySlider">
-      <span class="label-text">Duty cycle (%)</span>
-      <span class="label-readout">
-        <span class="slider-staged-label" id="dutyStagedLabel" hidden></span>
-        <span class="value" id="dutyValue">50</span>
-      </span>
-    </label>
-    <div class="slider-wrap">
-      <input type="range" id="dutySlider" min="0" max="100" step="5" value="50">
-      <span class="slider-staged-fill" id="dutyStagedFill" hidden aria-hidden="true"></span>
-      <span class="slider-staged-marker" id="dutyStagedMarker" hidden aria-hidden="true"></span>
+    <div class="actions actions-end">
+      <button id="sendSettings" type="button" disabled>Send Settings</button>
+      <button id="saveCurrentEntry" type="button">Save Entry</button>
     </div>
-    <div class="slider-bounds">
-      <span>0</span>
-      <span>50</span>
-      <span>100</span>
+
+    <div class="row">
+      <label for="commentInput">Comment</label>
+      <textarea id="commentInput" rows="2" placeholder="Comment"></textarea>
     </div>
-  </div>
 
-  <div class="actions actions-end">
-    <button id="sendSettings" type="button" disabled>Send Settings</button>
-    <button id="saveCurrentEntry" type="button">Save current as entry</button>
-  </div>
+    <p id="entryMessage"></p>
+  </section>
 
-  <div class="row">
-    <label for="commentInput">Comment</label>
-    <textarea id="commentInput" rows="2" placeholder="Comment"></textarea>
-  </div>
-
-  <p id="entryMessage"></p>
-
-  <section id="telemetry-section">
+  <section class="frame" id="telemetry-section">
     <h2>Serial monitor</h2>
     <pre id="telemetry">not connected</pre>
   </section>
 
-  <section id="entries-section">
+  <section class="frame" id="entries-section">
     <div class="entries-header">
       <h2>Saved entries</h2>
       <div class="entries-toolbar">
@@ -1008,7 +1129,7 @@
       const min = Number(slider.min);
       const max = Number(slider.max);
       const percent = max > min ? (value - min) / (max - min) : 0;
-      const thumb = 16;
+      const thumb = parseFloat(getComputedStyle(slider).getPropertyValue('--slider-knob-size')) || 16;
       const usableWidth = Math.max(slider.clientWidth - thumb, 0);
       const position = thumb / 2 + percent * usableWidth;
       fillEl.style.width = `${position}px`;
