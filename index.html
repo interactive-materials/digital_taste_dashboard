@@ -298,6 +298,10 @@
       text-transform: none;
     }
 
+    .unit {
+      text-transform: none;
+    }
+
     .slider-bounds span:nth-child(2) {
       text-align: center;
     }
@@ -812,7 +816,7 @@
 
     <div class="row">
       <label for="mvSlider">
-        <span class="label-text">Target voltage (mV)</span>
+        <span class="label-text">Target voltage (<span class="unit">mV</span>)</span>
         <span class="label-readout">
           <span class="slider-staged-label" id="mvStagedLabel" hidden></span>
           <span class="value" id="mvValue">200</span>
@@ -832,7 +836,7 @@
 
     <div class="row">
       <label for="freqSlider">
-        <span class="label-text">Frequency (Hz)</span>
+        <span class="label-text">Frequency (<span class="unit">Hz</span>)</span>
         <span class="label-readout">
           <span class="slider-staged-label" id="freqStagedLabel" hidden></span>
           <span class="value" id="freqValue">200</span>
@@ -908,8 +912,8 @@
     <div class="entry-row-header">
       <span aria-hidden="true"></span>
       <span>Taster</span>
-      <span>mV</span>
-      <span>Hz</span>
+      <span class="unit">mV</span>
+      <span class="unit">Hz</span>
       <span>Duty%</span>
       <span>Comment</span>
       <span></span>
@@ -1164,7 +1168,10 @@
         label.textContent = '';
         return;
       }
-      label.textContent = `Device: ${value}${unit}`;
+      const unitEl = document.createElement('span');
+      unitEl.className = 'unit';
+      unitEl.textContent = unit;
+      label.replaceChildren(`Device: ${value}`, unitEl);
       label.hidden = false;
     }
 
@@ -1379,7 +1386,7 @@
     }
 
     function entriesToCsv(entryList) {
-      const lines = ['mv,hz,duty,taster,comment'];
+      const lines = ['mV,Hz,duty,taster,comment'];
       for (const entry of entryList) {
         lines.push([
           escapeCsvField(entry.mv),
@@ -1669,7 +1676,7 @@
       const wrap = document.createElement('div');
       wrap.className = areaClass;
       const unitEl = document.createElement('span');
-      unitEl.className = 'entry-num-unit';
+      unitEl.className = 'entry-num-unit unit';
       unitEl.textContent = unit;
       wrap.append(input, unitEl);
       return wrap;
